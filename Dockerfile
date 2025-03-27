@@ -1,11 +1,19 @@
-# Sử dụng Java 17 runtime
-FROM openjdk:17-jdk-slim
+# 1. Base image có Maven + JDK
+FROM maven:3.8.5-openjdk-17-slim AS build
 
-# Tạo thư mục làm việc
+# 2. Sao chép toàn bộ source code vào image
+COPY . /app
 WORKDIR /app
 
-# Copy file jar đã build vào container
-COPY target/iotProjectNew-0.0.1-SNAPSHOT.jar app.jar
+# 3. Build jar
+RUN mvn clean package -DskipTests
 
-# Mặc định chạy file jar
+# 4. Tạo image chạy app từ JDK nhẹ
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+
+# 5. Copy jar đã build ở bước trên
+COPY --from=build /app/target/*.jar app.jar
+
+# 6. Chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]

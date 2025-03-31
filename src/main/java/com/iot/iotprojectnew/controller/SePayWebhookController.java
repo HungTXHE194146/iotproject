@@ -12,6 +12,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/sepay")
 public class SePayWebhookController {
+
+    private volatile long lastId = 0;
     private volatile String lastContent = "No content";
     private volatile long lastAmount = 0;
 
@@ -27,10 +29,11 @@ public class SePayWebhookController {
 
         // ⚠️ Chỉ xử lý nếu là tiền vào
         if ("in".equalsIgnoreCase(payload.getTransferType())) {
+            lastId = payload.getId();
             lastAmount = payload.getTransferAmount();  // ✅ Gán giá trị
             lastContent = payload.getContent();        // ✅ Gán giá trị
 
-            System.out.println("✅ Đã lưu vào biến: " + lastContent + " - " + lastAmount);
+            System.out.println("✅ Đã lưu vào biến: " + lastId + " - " + lastContent + " - " + lastAmount);
         } else {
             System.out.println("❌ Bỏ qua: Giao dịch không phải tiền vào.");
         }
@@ -43,6 +46,7 @@ public class SePayWebhookController {
     @GetMapping("/latest-transaction")
     public Map<String, Object> getLatestTransaction() {
         Map<String, Object> response = new HashMap<>();
+        response.put("id", lastId);
         response.put("amount", lastAmount);
         response.put("content", lastContent);
         return response;

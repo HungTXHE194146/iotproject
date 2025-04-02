@@ -47,6 +47,7 @@ public class SePayWebhookController {
     public Map<String, Object> getLatestTransaction() {
         Map<String, Object> response = new HashMap<>();
         response.put("id", lastId);
+
         response.put("amount", lastAmount);
         response.put("content", lastContent);
         return response;
